@@ -1,0 +1,12 @@
+# depslib dependency file v1.0
+1765460707 source:d:\semester 3\tugas std\tugasbesar\hewan.cpp
+	"hewan.h"
+
+1765460675 d:\semester 3\tugas std\tugasbesar\hewan.h
+	<iostream>
+	<string>
+
+1765641387 source:d:\semester 3\tugas std\tugasbesar\main.cpp
+	<iostream>
+	"hewan.h"
+
