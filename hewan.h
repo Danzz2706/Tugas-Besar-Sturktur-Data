@@ -3,50 +3,54 @@
 
 #include <iostream>
 #include <string>
+#include <iomanip>
+
 using namespace std;
 
-// --- Definisi Data ---
+/* =====================================================
+   ================ STRUKTUR DATA ======================
+   ===================================================== */
+
+// -------- DATA --------
 struct Owner {
     string id;
     string nama;
-    // Tambahkan data lain jika perlu
 };
 
 struct Pet {
     string id;
     string nama;
-    string jenis; // misal: Kucing, Anjing
+    string jenis;
 };
 
-// --- Definisi Pointer ---
+// -------- POINTER TYPE --------
 typedef struct elmOwner* adrOwner;
 typedef struct elmPet* adrPet;
 typedef struct elmRelation* adrRelation;
 
-// --- Definisi Element List ---
+// -------- ELEMEN LIST --------
 
-// List Parent (Double Linked List sesuai diagram)
+// Parent List (Double Linked List)
 struct elmOwner {
     Owner info;
     adrOwner next;
     adrOwner prev;
 };
 
-// List Child (Single Linked List)
+// Child List (Single Linked List)
 struct elmPet {
     Pet info;
     adrPet next;
 };
 
-// List Relasi (Single Linked List)
-// Menyimpan pointer ke Parent dan pointer ke Child
+// Relation List (Single Linked List)
 struct elmRelation {
-    adrOwner ownerPtr; // Pointer ke elemen Parent
-    adrPet petPtr;     // Pointer ke elemen Child
+    adrOwner ownerPtr;
+    adrPet petPtr;
     adrRelation next;
 };
 
-// --- Definisi List ---
+// -------- LIST --------
 struct ListOwner {
     adrOwner first;
     adrOwner last;
@@ -60,90 +64,93 @@ struct ListRelation {
     adrRelation first;
 };
 
-// --- Primitif Dasar ---
+/* =====================================================
+   ================ PRIMITIF DASAR =====================
+   ===================================================== */
+
 void createListOwner(ListOwner &L);
 void createListPet(ListPet &L);
 void createListRelation(ListRelation &L);
 
 adrOwner alokasiOwner(string id, string nama);
 adrPet alokasiPet(string id, string nama, string jenis);
-adrRelation alokasiRelation(adrOwner P, adrPet C);
+adrRelation alokasiRelation(adrOwner O, adrPet P);
 
-// --- a. Insert Element Parent ---
-void insertOwner(ListOwner &L, adrOwner P);
+/* =====================================================
+   ================ INSERT ==============================
+   ===================================================== */
 
-// --- b. Insert Element Child ---
-void insertPet(ListPet &L, adrPet C);
+void insertOwner(ListOwner &L, adrOwner O);
+void insertPet(ListPet &L, adrPet P);
+void connect(ListRelation &LR, ListOwner LO, ListPet LP, string idOwner, string idPet);
 
-// --- c. Insert Element Relation ---
-// Menghubungkan Parent dan Child berdasarkan ID mereka
-void connect(ListRelation &LR, ListOwner LP, ListPet LC, string idOwner, string idPet);
+/* =====================================================
+   ================ DELETE ==============================
+   ===================================================== */
 
-// --- d. Delete Element Parent ---
-// Hapus parent dan semua relasinya
-void deleteOwner(ListOwner &LP, ListRelation &LR, string idOwner);
-
-// --- e. Delete Element Child ---
-// Hapus child dan semua relasinya
-void deletePet(ListPet &LC, ListRelation &LR, string idPet);
-
-// --- f. Delete Element Relation ---
-// Putus hubungan tertentu antara Owner dan Pet
+void deleteOwner(ListOwner &LO, ListRelation &LR, string idOwner);
+void deletePet(ListPet &LP, ListRelation &LR, string idPet);
 void disconnect(ListRelation &LR, string idOwner, string idPet);
 
-// --- g. Find Element Parent ---
+/* =====================================================
+   ================ SEARCH ==============================
+   ===================================================== */
+
 adrOwner findOwner(ListOwner L, string id);
-
-// --- h. Find Element Child ---
 adrPet findPet(ListPet L, string id);
-
-// --- i. Find Relasi ---
-// Cek apakah Owner X punya Hewan Y
 adrRelation findRelation(ListRelation L, string idOwner, string idPet);
 
-// --- j. Show All Parent ---
+/* =====================================================
+   ================ DISPLAY (LOGIC) =====================
+   ===================================================== */
+
 void printOwners(ListOwner L);
-
-// --- k. Show All Child ---
 void printPets(ListPet L);
-
-// --- l. Show Data Child dari Parent Tertentu ---
-// Menampilkan semua hewan milik Owner X
 void printPetsByOwner(ListRelation LR, string idOwner);
-
-// --- m. Show Data Parent dari Child Tertentu ---
-// Menampilkan siapa saja pemilik Hewan Y
 void printOwnersByPet(ListRelation LR, string idPet);
+void printAllOwnersWithPets(ListOwner LO, ListRelation LR);
+void printAllPetsWithOwners(ListPet LP, ListRelation LR);
 
-// --- n. Show Setiap Parent beserta Child-nya ---
-void printAllOwnersWithPets(ListOwner LP, ListRelation LR);
+/* =====================================================
+   ================ DISPLAY (UI TABLE) ==================
+   ===================================================== */
 
-// --- o. Show Setiap Child beserta Parent-nya ---
-void printAllPetsWithOwners(ListPet LC, ListRelation LR);
+void printOwnersTable(ListOwner LO);
+void printPetsTable(ListPet LP);
+void printOwnersWithPetsTable(ListOwner LO, ListRelation LR);
+void printPetsWithOwnersTable(ListPet LP, ListRelation LR);
 
-// --- p. Count Child dari Parent Tertentu ---
+/* =====================================================
+   ================ COUNT / STAT ========================
+   ===================================================== */
+
 int countPetsOfOwner(ListRelation LR, string idOwner);
-
-// --- q. Count Parent dari Child Tertentu ---
 int countOwnersOfPet(ListRelation LR, string idPet);
+int countOrphanPets(ListPet LP, ListRelation LR);
+int countChildlessOwners(ListOwner LO, ListRelation LR);
 
-// --- r. Count Child yang tidak punya Parent (Liar/Belum diadopsi) ---
-int countOrphanPets(ListPet LC, ListRelation LR);
+/* =====================================================
+   ================ EDIT / UPDATE =======================
+   ===================================================== */
 
-// --- s. Count Parent yang tidak punya Child ---
-int countChildlessOwners(ListOwner LP, ListRelation LR);
+void editRelation(
+    ListRelation &LR,
+    ListOwner LO,
+    ListPet LP,
+    string oldOwnerID,
+    string oldPetID,
+    string newOwnerID,
+    string newPetID
+);
 
-// --- t. Edit Relasi ---
-// Mengganti kepemilikan atau mengganti hewan
-void editRelation(ListRelation &LR, ListOwner LP, ListPet LC, string oldOwnerID, string oldPetID, string newOwnerID, string newPetID);
-
-// --- u. Update Data Owner ---
 void updateOwner(ListOwner &L, string id, string newNama);
-
-// --- v. Update Data Pet ---
 void updatePet(ListPet &L, string id, string newNama, string newJenis);
 
-// --- w. Sort Owner by Name (Ascending) ---
+/* =====================================================
+   ================ SORT ================================
+   ===================================================== */
+
 void sortOwnersByNama(ListOwner &L);
 
 #endif // HEWAN_H_INCLUDED
+

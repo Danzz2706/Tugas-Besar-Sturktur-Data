@@ -1,29 +1,125 @@
 #include <iostream>
+#include <iomanip>
+#include <cstdlib>
+#include <cctype>
 #include "hewan.h"
+
 using namespace std;
 
-void showMenu() {
-    cout << "\n=== APLIKASI MANAJEMEN HEWAN & PEMILIK ===" << endl;
-    cout << "1. Insert Owner (Parent)" << endl;
-    cout << "2. Insert Pet (Child)" << endl;
-    cout << "3. Connect (Hubungkan Owner & Pet)" << endl;
-    cout << "4. Show All Owners" << endl;
-    cout << "5. Show All Pets" << endl;
-    cout << "6. Show All Owners beserta Hewannya" << endl;
-    cout << "7. Show All Pets beserta Pemiliknya" << endl;
-    cout << "8. Cari Hewan milik Owner tertentu" << endl;
-    cout << "9. Cari Pemilik dari Hewan tertentu" << endl;
-    cout << "10. Delete Relation (Putus Hubungan)" << endl;
-    cout << "11. Delete Owner (Cascade Delete)" << endl;
-    cout << "12. Delete Pet (Cascade Delete)" << endl;
-    cout << "13. Statistik (Count)" << endl;
-    cout << "14. Edit Relation (Pindah Tangan)" << endl;
-    cout << "15. Edit Data Owner" << endl;
-    cout << "16. Edit Data Pet" << endl;
-    cout << "17. Sort Owner by Name (Ascending)" << endl;
-    cout << "0. Exit" << endl;
-    cout << "Pilihan: ";
+/* ================= UTIL UI ================= */
+
+void clearScreen() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
 }
+
+void pauseScreen() {
+    cout << "\nTekan ENTER untuk lanjut...";
+    cin.ignore();
+    cin.get();
+}
+
+void printLine(int len = 70) {
+    for (int i = 0; i < len; i++) cout << "=";
+    cout << endl;
+}
+
+/* ================= VALIDATION ================= */
+
+bool isInteger(string s) {
+    if (s.empty()) return false;
+    for (char c : s) {
+        if (!isdigit(c)) return false;
+    }
+    return true;
+}
+
+string getValidOwnerID(ListOwner L) {
+    string id;
+    while (true) {
+        cout << "ID Owner (Angka) : ";
+        cin >> id;
+        if (!isInteger(id)) {
+            cout << "Error: ID harus berupa angka!\n";
+        } else if (findOwner(L, id) != NULL) {
+            cout << "Error: ID sudah digunakan!\n";
+        } else {
+            return id;
+        }
+    }
+}
+
+bool isOwnerNameExists(ListOwner L, string nama) {
+    adrOwner P = L.first;
+    while (P != NULL) {
+        if (P->info.nama == nama) {
+            return true;
+        }
+        P = P->next;
+    }
+    return false;
+}
+
+string getValidOwnerName(ListOwner L) {
+    string nama;
+    while (true) {
+        cout << "Nama Owner : ";
+        cin >> nama;
+        if (isOwnerNameExists(L, nama)) {
+            cout << "Error: Nama Owner sudah ada!\n";
+        } else {
+            return nama;
+        }
+    }
+}
+
+string getValidPetID(ListPet L) {
+    string id;
+    while (true) {
+        cout << "ID Pet (Angka)   : ";
+        cin >> id;
+        if (!isInteger(id)) {
+            cout << "Error: ID harus berupa angka!\n";
+        } else if (findPet(L, id) != NULL) {
+            cout << "Error: ID sudah digunakan!\n";
+        } else {
+            return id;
+        }
+    }
+}
+
+/* ================= MENU ================= */
+
+void showMenu() {
+    printLine();
+    cout << "   APLIKASI MANAJEMEN HEWAN & PEMILIK (MULTI LINKED LIST)\n";
+    printLine();
+    cout << "|  1 | Insert Owner (Parent)                           |\n";
+    cout << "|  2 | Insert Pet (Child)                              |\n";
+    cout << "|  3 | Connect Owner & Pet                             |\n";
+    cout << "|  4 | Show All Owners                                 |\n";
+    cout << "|  5 | Show All Pets                                   |\n";
+    cout << "|  6 | Show Owners beserta Hewannya                    |\n";
+    cout << "|  7 | Show Pets beserta Pemiliknya                    |\n";
+    cout << "|  8 | Cari Hewan milik Owner                          |\n";
+    cout << "|  9 | Cari Pemilik dari Hewan                         |\n";
+    cout << "| 10 | Delete Relation                                 |\n";
+    cout << "| 11 | Delete Owner (Cascade Delete)                   |\n";
+    cout << "| 12 | Delete Pet (Cascade Delete)                     |\n";
+    cout << "| 13 | Statistik                                       |\n";
+    cout << "| 14 | Edit Relation (Pindah Tangan)                   |\n";
+    cout << "| 15 | Edit Data Owner                                 |\n";
+    cout << "| 16 | Edit Data Pet                                   |\n";
+    cout << "| 17 | Sort Owner by Name (Ascending)                  |\n";
+    cout << "|  0 | Exit                                            |\n";
+    printLine();
+    cout << "Pilihan : ";
+}
+
+/* ================= MAIN ================= */
 
 int main() {
     ListOwner LO;
@@ -34,128 +130,181 @@ int main() {
     createListPet(LP);
     createListRelation(LR);
 
-    // Data Dummy untuk tes cepat
-    insertOwner(LO, alokasiOwner("O1", "Budi"));
-    insertOwner(LO, alokasiOwner("O2", "Siti"));
-    insertPet(LP, alokasiPet("P1", "Molly", "Kucing"));
-    insertPet(LP, alokasiPet("P2", "Bruno", "Anjing"));
-    insertPet(LP, alokasiPet("P3", "Tweety", "Burung"));
+    /* ================= DATA DUMMY ================= */
 
-    // Connect
-    connect(LR, LO, LP, "O1", "P1"); // Budi punya Molly
-    connect(LR, LO, LP, "O1", "P2"); // Budi punya Bruno
-    connect(LR, LO, LP, "O2", "P1"); // Siti juga punya Molly (Shared ownership)
+    // OWNER
+    insertOwner(LO, alokasiOwner("1", "Budi"));
+    insertOwner(LO, alokasiOwner("2", "Siti"));
+    insertOwner(LO, alokasiOwner("3", "Andi"));
 
-    // Helper lambda for numeric validation
-    auto isNumeric = [](const string& s) {
-        if (s.empty()) return false;
-        for (char c : s) {
-            if (!isdigit(c)) return false;
-        }
-        return true;
-    };
+    // PET
+    insertPet(LP, alokasiPet("1", "Molly", "Kucing"));
+    insertPet(LP, alokasiPet("2", "Bruno", "Anjing"));
+    insertPet(LP, alokasiPet("3", "Tweety", "Burung"));
+    insertPet(LP, alokasiPet("4", "Nemo", "Ikan"));
 
-    // Helper lambda to get valid numeric ID
-    auto getValidID = [&](string prompt) -> string {
-        string input;
-        while (true) {
-            cout << prompt;
-            cin >> input;
-            if (isNumeric(input)) {
-                return input;
-            }
-            cout << "Error: ID harus berupa angka! Silakan coba lagi." << endl;
-        }
-    };
+    // RELATION
+    connect(LR, LO, LP, "1", "1"); // Budi - Molly
+    connect(LR, LO, LP, "1", "2"); // Budi - Bruno
+    connect(LR, LO, LP, "2", "1"); // Siti - Molly (shared)
+    connect(LR, LO, LP, "3", "4"); // Andi - Nemo
+
 
     int choice;
+    string choiceStr;
     string id1, id2, id3, id4, nama, jenis;
 
     do {
+        clearScreen();
         showMenu();
-        if (!(cin >> choice)) {
-            cout << "Input tidak valid! Harap masukkan angka." << endl;
-            cin.clear();
-            cin.ignore(1000, '\n');
-            choice = -1; // Set invalid choice to continue loop
-        }
-        cout << endl;
+        cin >> choiceStr;
+        cin.ignore();
 
-        if (choice == 1) {
-            id1 = getValidID("Masukkan ID Owner: ");
-            if (findOwner(LO, id1) != NULL) {
-                cout << "Error: ID Owner sudah ada!" << endl;
-            } else {
-                cout << "Masukkan Nama Owner: "; cin >> nama;
-                insertOwner(LO, alokasiOwner(id1, nama));
-            }
-        } else if (choice == 2) {
-            id1 = getValidID("Masukkan ID Pet: ");
-            if (findPet(LP, id1) != NULL) {
-                cout << "Error: ID Pet sudah ada!" << endl;
-            } else {
-                cout << "Masukkan Nama Pet: "; cin >> nama;
-                cout << "Masukkan Jenis Pet: "; cin >> jenis;
-                insertPet(LP, alokasiPet(id1, nama, jenis));
-            }
-        } else if (choice == 3) {
-            id1 = getValidID("ID Owner: ");
-            id2 = getValidID("ID Pet: ");
+        if (isInteger(choiceStr)) {
+            choice = atoi(choiceStr.c_str());
+        } else {
+            choice = -1;
+        }
+
+        clearScreen();
+
+        switch (choice) {
+
+        case 1:
+            cout << "--- INSERT OWNER ---\n";
+            // cout << "ID Owner   : "; cin >> id1;
+            id1 = getValidOwnerID(LO);
+            // cout << "Nama Owner : "; cin >> nama;
+            nama = getValidOwnerName(LO);
+            insertOwner(LO, alokasiOwner(id1, nama));
+            pauseScreen();
+            break;
+
+        case 2:
+            cout << "--- INSERT PET ---\n";
+            // cout << "ID Pet : "; cin >> id1;
+            id1 = getValidPetID(LP);
+            cout << "Nama   : "; cin >> nama;
+            cout << "Jenis  : "; cin >> jenis;
+            insertPet(LP, alokasiPet(id1, nama, jenis));
+            pauseScreen();
+            break;
+
+        case 3:
+            cout << "--- CONNECT OWNER & PET ---\n";
+            cout << "ID Owner : "; cin >> id1;
+            cout << "ID Pet   : "; cin >> id2;
             connect(LR, LO, LP, id1, id2);
-        } else if (choice == 4) {
-            printOwners(LO);
-        } else if (choice == 5) {
-            printPets(LP);
-        } else if (choice == 6) {
-            printAllOwnersWithPets(LO, LR);
-        } else if (choice == 7) {
-            printAllPetsWithOwners(LP, LR);
-        } else if (choice == 8) {
-            id1 = getValidID("ID Owner: ");
+            pauseScreen();
+            break;
+
+        case 4:
+            printOwnersTable(LO);
+            pauseScreen();
+            break;
+
+        case 5:
+            printPetsTable(LP);
+            pauseScreen();
+            break;
+
+        case 6:
+            printOwnersWithPetsTable(LO, LR);
+            pauseScreen();
+            break;
+
+        case 7:
+            printPetsWithOwnersTable(LP, LR);
+            pauseScreen();
+            break;
+
+        case 8:
+            cout << "--- CARI HEWAN MILIK OWNER ---\n";
+            cout << "ID Owner: "; cin >> id1;
             printPetsByOwner(LR, id1);
-        } else if (choice == 9) {
-            id1 = getValidID("ID Pet: ");
+            pauseScreen();
+            break;
+
+        case 9:
+            cout << "--- CARI PEMILIK DARI HEWAN ---\n";
+            cout << "ID Pet: "; cin >> id1;
             printOwnersByPet(LR, id1);
-        } else if (choice == 10) {
-            id1 = getValidID("ID Owner: ");
-            id2 = getValidID("ID Pet: ");
+            pauseScreen();
+            break;
+
+        case 10:
+            cout << "--- DELETE RELATION ---\n";
+            cout << "ID Owner : "; cin >> id1;
+            cout << "ID Pet   : "; cin >> id2;
             disconnect(LR, id1, id2);
-        } else if (choice == 11) {
-            id1 = getValidID("ID Owner yang akan dihapus: ");
+            pauseScreen();
+            break;
+
+        case 11:
+            cout << "--- DELETE OWNER ---\n";
+            cout << "ID Owner: "; cin >> id1;
             deleteOwner(LO, LR, id1);
-        } else if (choice == 12) {
-            id1 = getValidID("ID Pet yang akan dihapus: ");
+            pauseScreen();
+            break;
+
+        case 12:
+            cout << "--- DELETE PET ---\n";
+            cout << "ID Pet: "; cin >> id1;
             deletePet(LP, LR, id1);
-        } else if (choice == 13) {
-            cout << "--- STATISTIK ---" << endl;
-            cout << "Jumlah  Hewan tak bertuan: " << countOrphanPets(LP, LR) << endl;
-            cout << "Jumlah Owner tanpa hewan: " << countChildlessOwners(LO, LR) << endl;
-        } else if (choice == 14) {
-            cout << "--- Edit Relation ---" << endl;
-            id1 = getValidID("ID Owner Lama: ");
-            id2 = getValidID("ID Pet Lama: ");
-            id3 = getValidID("ID Owner Baru: ");
-            id4 = getValidID("ID Pet Baru: ");
+            pauseScreen();
+            break;
+
+        case 13:
+            cout << "--- STATISTIK ---\n";
+            cout << "Hewan tak bertuan : " << countOrphanPets(LP, LR) << endl;
+            cout << "Owner tanpa hewan : " << countChildlessOwners(LO, LR) << endl;
+            pauseScreen();
+            break;
+
+        case 14:
+            cout << "--- EDIT RELATION ---\n";
+            cout << "Old Owner ID : "; cin >> id1;
+            cout << "Old Pet ID   : "; cin >> id2;
+            cout << "New Owner ID : "; cin >> id3;
+            cout << "New Pet ID   : "; cin >> id4;
             editRelation(LR, LO, LP, id1, id2, id3, id4);
-        } else if (choice == 15) {
-            cout << "--- Edit Owner ---" << endl;
-            id1 = getValidID("ID Owner: ");
+            pauseScreen();
+            break;
+
+        case 15:
+            cout << "--- EDIT DATA OWNER ---\n";
+            cout << "ID Owner : "; cin >> id1;
             cout << "Nama Baru: "; cin >> nama;
             updateOwner(LO, id1, nama);
-        } else if (choice == 16) {
-            cout << "--- Edit Pet ---" << endl;
-            id1 = getValidID("ID Pet: ");
-            cout << "Nama Baru: "; cin >> nama;
+            pauseScreen();
+            break;
+
+        case 16:
+            cout << "--- EDIT DATA PET ---\n";
+            cout << "ID Pet    : "; cin >> id1;
+            cout << "Nama Baru : "; cin >> nama;
             cout << "Jenis Baru: "; cin >> jenis;
             updatePet(LP, id1, nama, jenis);
-        } else if (choice == 17) {
+            pauseScreen();
+            break;
+
+        case 17:
             sortOwnersByNama(LO);
-        } else if (choice == 0) {
-            cout << "Keluar..." << endl;
-        } else {
-            cout << "Pilihan tidak valid." << endl;
+            cout << "Owner berhasil diurutkan (A-Z).\n";
+            pauseScreen();
+            break;
+
+        case 0:
+            cout << "Keluar dari program...\n";
+            break;
+
+        default:
+            cout << "Pilihan tidak valid!\n";
+            pauseScreen();
         }
+
     } while (choice != 0);
 
     return 0;
 }
+

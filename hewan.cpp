@@ -1,4 +1,9 @@
 #include "hewan.h"
+
+/* =====================================================
+   ================ CREATE LIST =========================
+   ===================================================== */
+
 void createListOwner(ListOwner &L) {
     L.first = nullptr;
     L.last = nullptr;
@@ -12,13 +17,17 @@ void createListRelation(ListRelation &L) {
     L.first = nullptr;
 }
 
+/* =====================================================
+   ================ ALOKASI =============================
+   ===================================================== */
+
 adrOwner alokasiOwner(string id, string nama) {
-    adrOwner P = new elmOwner;
-    P->info.id = id;
-    P->info.nama = nama;
-    P->next = nullptr;
-    P->prev = nullptr;
-    return P;
+    adrOwner O = new elmOwner;
+    O->info.id = id;
+    O->info.nama = nama;
+    O->next = nullptr;
+    O->prev = nullptr;
+    return O;
 }
 
 adrPet alokasiPet(string id, string nama, string jenis) {
@@ -30,44 +39,66 @@ adrPet alokasiPet(string id, string nama, string jenis) {
     return P;
 }
 
-adrRelation alokasiRelation(adrOwner P, adrPet C) {
+adrRelation alokasiRelation(adrOwner O, adrPet P) {
     adrRelation R = new elmRelation;
-    R->ownerPtr = P;
-    R->petPtr = C;
-    R->next = NULL;
+    R->ownerPtr = O;
+    R->petPtr = P;
+    R->next = nullptr;
     return R;
 }
 
-// ---------------- INSERT (A, B) ----------------
-void insertOwner(ListOwner &L, adrOwner P) {
-    // Insert Last (Double Linked List)
+/* =====================================================
+   ================ INSERT ==============================
+   ===================================================== */
+
+void insertOwner(ListOwner &L, adrOwner O) {
     if (L.first == nullptr) {
-        L.first = P;
-        L.last = P;
+        L.first = O;
+        L.last = O;
     } else {
-        L.last->next = P;
-        P->prev = L.last;
-        L.last = P;
+        L.last->next = O;
+        O->prev = L.last;
+        L.last = O;
     }
 }
 
-void insertPet(ListPet &L, adrPet C) {
-    // Insert Last (Single Linked List)
+void insertPet(ListPet &L, adrPet P) {
     if (L.first == nullptr) {
-        L.first = C;
+        L.first = P;
     } else {
         adrPet Q = L.first;
         while (Q->next != nullptr) {
             Q = Q->next;
         }
-        Q->next = C;
+        Q->next = P;
     }
 }
 
-// ---------------- FIND (G, H) ----------------
+void connect(ListRelation &LR, ListOwner LO, ListPet LP, string idOwner, string idPet) {
+    adrOwner O = findOwner(LO, idOwner);
+    adrPet P = findPet(LP, idPet);
+
+    if (O && P) {
+        if (findRelation(LR, idOwner, idPet) == nullptr) {
+            adrRelation R = alokasiRelation(O, P);
+            R->next = LR.first;
+            LR.first = R;
+            cout << "Relasi berhasil ditambahkan.\n";
+        } else {
+            cout << "Relasi sudah ada.\n";
+        }
+    } else {
+        cout << "Owner atau Pet tidak ditemukan.\n";
+    }
+}
+
+/* =====================================================
+   ================ SEARCH ==============================
+   ===================================================== */
+
 adrOwner findOwner(ListOwner L, string id) {
     adrOwner P = L.first;
-    while (P != nullptr) {
+    while (P) {
         if (P->info.id == id) return P;
         P = P->next;
     }
@@ -76,7 +107,7 @@ adrOwner findOwner(ListOwner L, string id) {
 
 adrPet findPet(ListPet L, string id) {
     adrPet P = L.first;
-    while (P != nullptr) {
+    while (P) {
         if (P->info.id == id) return P;
         P = P->next;
     }
@@ -85,204 +116,211 @@ adrPet findPet(ListPet L, string id) {
 
 adrRelation findRelation(ListRelation L, string idOwner, string idPet) {
     adrRelation R = L.first;
-    while (R != nullptr) {
-        if (R->ownerPtr->info.id == idOwner && R->petPtr->info.id == idPet) {
+    while (R) {
+        if (R->ownerPtr->info.id == idOwner &&
+            R->petPtr->info.id == idPet)
             return R;
-        }
         R = R->next;
     }
     return nullptr;
 }
 
-// ---------------- CONNECT / INSERT RELASI (C) ----------------
-void connect(ListRelation &LR, ListOwner LP, ListPet LC, string idOwner, string idPet) {
-    adrOwner O = findOwner(LP, idOwner);
-    adrPet P = findPet(LC, idPet);
+/* =====================================================
+   ================ DELETE ==============================
+   ===================================================== */
 
-    if (O != NULL && P != nullptr) {
-        // Cek apakah sudah ada relasi
-        if (findRelation(LR, idOwner, idPet) == nullptr) {
-            adrRelation R = alokasiRelation(O, P);
-            // Insert First pada Relasi (biar cepat)
-            R->next = LR.first;
-            LR.first = R;
-            cout << "Berhasil menghubungkan " << O->info.nama << " dengan " << P->info.nama << endl;
-        } else {
-            cout << "Relasi sudah ada." << endl;
-        }
-    } else {
-        cout << "Owner atau Pet tidak ditemukan." << endl;
-    }
-}
-
-// ---------------- DELETE (D, E, F) ----------------
 void disconnect(ListRelation &LR, string idOwner, string idPet) {
-    // Menghapus node relasi tertentu
-    adrRelation P = LR.first;
-    adrRelation Prev = nullptr;
-    bool found = false;
+    adrRelation P = LR.first, prev = nullptr;
 
-    while (P != nullptr && !found) {
-        if (P->ownerPtr->info.id == idOwner && P->petPtr->info.id == idPet) {
-            found = true;
-        } else {
-            Prev = P;
-            P = P->next;
+    while (P) {
+        if (P->ownerPtr->info.id == idOwner &&
+            P->petPtr->info.id == idPet) {
+
+            if (prev == nullptr)
+                LR.first = P->next;
+            else
+                prev->next = P->next;
+
+            delete P;
+            cout << "Relasi berhasil dihapus.\n";
+            return;
         }
-    }
-
-    if (found) {
-        if (Prev == nullptr) { // Hapus elemen pertama
-            LR.first = P->next;
-        } else {
-            Prev->next = P->next;
-        }
-        delete P;
-        cout << "Relasi dihapus." << endl;
-    } else {
-        cout << "Relasi tidak ditemukan." << endl;
-    }
-}
-
-void deleteOwner(ListOwner &LP, ListRelation &LR, string idOwner) {
-    // 1. Hapus semua relasi yang melibatkan owner ini dulu
-    adrRelation R = LR.first;
-    while (R != nullptr) {
-        adrRelation nextR = R->next;
-        if (R->ownerPtr->info.id == idOwner) {
-            disconnect(LR, idOwner, R->petPtr->info.id);
-        }
-        R = R ->next;
-    }
-
-    // 2. Hapus Owner dari List Parent
-    adrOwner P = findOwner(LP, idOwner);
-    if (P != nullptr) {
-        if (P == LP.first) { // Hapus awal
-            LP.first = P->next;
-            if (LP.first != nullptr){
-                LP.first->prev = nullptr;
-            } else {
-                LP.last = nullptr;
-            }
-        } else if (P == LP.last) { // Hapus akhir
-            LP.last = P->prev;
-            LP.last->next = nullptr;
-        } else { // Hapus tengah
-            P->prev->next = P->next;
-            P->next->prev = P->prev;
-        }
-        delete P;
-        cout << "Owner berhasil dihapus." << endl;
-    } else {
-        cout << "Owner tidak ditemukan." << endl;
-    }
-}
-
-void deletePet(ListPet &LC, ListRelation &LR, string idPet) {
-    // 1. Hapus semua relasi yang melibatkan pet ini
-    adrRelation R = LR.first;
-    while (R != nullptr) {
-        adrRelation nextR = R->next;
-        if (R->petPtr->info.id == idPet) {
-            disconnect(LR, R->ownerPtr->info.id, idPet);
-        }
-        R = R ->next;
-    }
-
-    // 2. Hapus Pet dari List Child
-    adrPet P = findPet(LC, idPet);
-    if (P != nullptr) {
-        if (P == LC.first) {
-            LC.first = P->next;
-        } else {
-            adrPet Q = LC.first;
-            while (Q->next != P) {
-                Q = Q->next;
-            }
-            Q->next = P->next;
-        }
-        delete P;
-        cout << "Pet berhasil dihapus." << endl;
-    } else {
-        cout << "Pet tidak ditemukan." << endl;
-    }
-}
-
-// ---------------- SHOW (J, K, L, M, N, O) ----------------
-void printOwners(ListOwner L) {
-    adrOwner P = L.first;
-    cout << "=== List Owner ===" << endl;
-    while (P != nullptr) {
-        cout << "ID: " << P->info.id << " | Nama: " << P->info.nama << endl;
+        prev = P;
         P = P->next;
     }
-    cout << endl;
+    cout << "Relasi tidak ditemukan.\n";
+}
+
+void deleteOwner(ListOwner &LO, ListRelation &LR, string idOwner) {
+    // hapus relasi
+    adrRelation R = LR.first;
+    while (R) {
+        adrRelation nextR = R->next;
+        if (R->ownerPtr->info.id == idOwner)
+            disconnect(LR, idOwner, R->petPtr->info.id);
+        R = nextR;
+    }
+
+    adrOwner O = findOwner(LO, idOwner);
+    if (!O) {
+        cout << "Owner tidak ditemukan.\n";
+        return;
+    }
+
+    if (O == LO.first) {
+        LO.first = O->next;
+        if (LO.first) LO.first->prev = nullptr;
+        else LO.last = nullptr;
+    } else if (O == LO.last) {
+        LO.last = O->prev;
+        LO.last->next = nullptr;
+    } else {
+        O->prev->next = O->next;
+        O->next->prev = O->prev;
+    }
+
+    delete O;
+    cout << "Owner berhasil dihapus.\n";
+}
+
+void deletePet(ListPet &LP, ListRelation &LR, string idPet) {
+    adrRelation R = LR.first;
+    while (R) {
+        adrRelation nextR = R->next;
+        if (R->petPtr->info.id == idPet)
+            disconnect(LR, R->ownerPtr->info.id, idPet);
+        R = nextR;
+    }
+
+    adrPet P = findPet(LP, idPet);
+    if (!P) {
+        cout << "Pet tidak ditemukan.\n";
+        return;
+    }
+
+    if (P == LP.first) {
+        LP.first = P->next;
+    } else {
+        adrPet Q = LP.first;
+        while (Q->next != P) Q = Q->next;
+        Q->next = P->next;
+    }
+
+    delete P;
+    cout << "Pet berhasil dihapus.\n";
+}
+
+/* =====================================================
+   ================ DISPLAY (LOGIC) =====================
+   ===================================================== */
+
+void printOwners(ListOwner L) {
+    adrOwner P = L.first;
+    while (P) {
+        cout << P->info.id << " - " << P->info.nama << endl;
+        P = P->next;
+    }
 }
 
 void printPets(ListPet L) {
     adrPet P = L.first;
-    cout << "=== List Hewan ===" << endl;
-    while (P != nullptr) {
-        cout << "ID: " << P->info.id << " | Nama: " << P->info.nama << " (" << P->info.jenis << ")" << endl;
+    while (P) {
+        cout << P->info.id << " - " << P->info.nama
+             << " (" << P->info.jenis << ")\n";
         P = P->next;
     }
-    cout << endl;
 }
 
-void printPetsByOwner(ListRelation LR, string idOwner) {
-    adrRelation R = LR.first;
-    bool found = false;
-    cout << "Hewan milik Owner ID " << idOwner << ":" << endl;
-    while (R != nullptr) {
-        if (R->ownerPtr->info.id == idOwner) {
-            cout << "- " << R->petPtr->info.nama << " (" << R->petPtr->info.jenis << ")" << endl;
-            found = true;
+/* =====================================================
+   ================ DISPLAY (UI TABLE) ==================
+   ===================================================== */
+
+void printOwnersTable(ListOwner LO) {
+    cout << left << setw(10) << "ID" << setw(20) << "NAMA OWNER" << endl;
+    cout << string(30, '-') << endl;
+
+    adrOwner P = LO.first;
+    while (P) {
+        cout << left << setw(10) << P->info.id
+             << setw(20) << P->info.nama << endl;
+        P = P->next;
+    }
+}
+
+void printPetsTable(ListPet LP) {
+    cout << left << setw(10) << "ID"
+         << setw(15) << "NAMA"
+         << setw(15) << "JENIS" << endl;
+    cout << string(40, '-') << endl;
+
+    adrPet P = LP.first;
+    while (P) {
+        cout << left << setw(10) << P->info.id
+             << setw(15) << P->info.nama
+             << setw(15) << P->info.jenis << endl;
+        P = P->next;
+    }
+}
+
+void printOwnersWithPetsTable(ListOwner LO, ListRelation LR) {
+    adrOwner O = LO.first;
+    while (O) {
+        cout << "\nOwner: " << O->info.nama << " (" << O->info.id << ")\n";
+        cout << left << setw(10) << "PET ID"
+             << setw(15) << "NAMA"
+             << setw(15) << "JENIS" << endl;
+        cout << string(40, '-') << endl;
+
+        bool ada = false;
+        adrRelation R = LR.first;
+        while (R) {
+            if (R->ownerPtr == O) {
+                adrPet P = R->petPtr;
+                cout << left << setw(10) << P->info.id
+                     << setw(15) << P->info.nama
+                     << setw(15) << P->info.jenis << endl;
+                ada = true;
+            }
+            R = R->next;
         }
-        R = R->next;
+        if (!ada) cout << "(Tidak punya hewan)\n";
+        O = O->next;
     }
-    if (!found) cout << "(Tidak ada hewan)" << endl;
 }
 
-void printOwnersByPet(ListRelation LR, string idPet) {
-    adrRelation R = LR.first;
-    bool found = false;
-    cout << "Pemilik dari Hewan ID " << idPet << ":" << endl;
-    while (R != nullptr) {
-        if (R->petPtr->info.id == idPet) {
-            cout << "- " << R->ownerPtr->info.nama << endl;
-            found = true;
+void printPetsWithOwnersTable(ListPet LP, ListRelation LR) {
+    adrPet P = LP.first;
+    while (P) {
+        cout << "\nPet: " << P->info.nama
+             << " (" << P->info.jenis << ")\n";
+        cout << left << setw(10) << "OWNER ID"
+             << setw(20) << "NAMA OWNER" << endl;
+        cout << string(30, '-') << endl;
+
+        bool ada = false;
+        adrRelation R = LR.first;
+        while (R) {
+            if (R->petPtr == P) {
+                adrOwner O = R->ownerPtr;
+                cout << left << setw(10) << O->info.id
+                     << setw(20) << O->info.nama << endl;
+                ada = true;
+            }
+            R = R->next;
         }
-        R = R->next;
-    }
-    if (!found) cout << "(Tidak ada pemilik)" << endl;
-}
-
-void printAllOwnersWithPets(ListOwner LP, ListRelation LR) {
-    adrOwner P = LP.first;
-    while (P != nullptr) {
-        cout << "Owner: " << P->info.nama << endl;
-        printPetsByOwner(LR, P->info.id);
-        cout << "-----------------" << endl;
+        if (!ada) cout << "(Tidak punya pemilik)\n";
         P = P->next;
     }
 }
 
-void printAllPetsWithOwners(ListPet LC, ListRelation LR) {
-    adrPet P = LC.first;
-    while (P != nullptr) {
-        cout << "Hewan: " << P->info.nama << endl;
-        printOwnersByPet(LR, P->info.id);
-        cout << "-----------------" << endl;
-        P = P->next;
-    }
-}
+/* =====================================================
+   ================ COUNT / UPDATE / SORT ===============
+   ===================================================== */
 
-// ---------------- COUNT (P, Q, R, S) ----------------
 int countPetsOfOwner(ListRelation LR, string idOwner) {
     int count = 0;
     adrRelation R = LR.first;
-    while (R != nullptr) {
+    while (R) {
         if (R->ownerPtr->info.id == idOwner) count++;
         R = R->next;
     }
@@ -292,112 +330,132 @@ int countPetsOfOwner(ListRelation LR, string idOwner) {
 int countOwnersOfPet(ListRelation LR, string idPet) {
     int count = 0;
     adrRelation R = LR.first;
-    while (R != nullptr) {
+    while (R) {
         if (R->petPtr->info.id == idPet) count++;
         R = R->next;
     }
     return count;
 }
 
-int countOrphanPets(ListPet LC, ListRelation LR) {
+int countOrphanPets(ListPet LP, ListRelation LR) {
     int count = 0;
-    adrPet P = LC.first;
-    while (P != nullptr) {
-        if (countOwnersOfPet(LR, P->info.id) == 0) {
+    adrPet P = LP.first;
+    while (P) {
+        if (countOwnersOfPet(LR, P->info.id) == 0)
             count++;
-        }
         P = P->next;
     }
     return count;
 }
 
-int countChildlessOwners(ListOwner LP, ListRelation LR) {
+int countChildlessOwners(ListOwner LO, ListRelation LR) {
     int count = 0;
-    adrOwner P = LP.first;
-    while (P != nullptr) {
-        if (countPetsOfOwner(LR, P->info.id) == 0) {
+    adrOwner O = LO.first;
+    while (O) {
+        if (countPetsOfOwner(LR, O->info.id) == 0)
             count++;
-        }
-        P = P->next;
+        O = O->next;
     }
     return count;
 }
 
-// ---------------- EDIT (T) ----------------
-void editRelation(ListRelation &LR, ListOwner LP, ListPet LC, string oldOwnerID, string oldPetID, string newOwnerID, string newPetID) {
-    // Cari relasi lama
-    adrRelation R = findRelation(LR, oldOwnerID, oldPetID);
-    if (R == nullptr) {
-        cout << "Relasi lama tidak ditemukan!" << endl;
-        return;
-    }
-
-    // Cari Owner dan Pet baru
-    adrOwner newOwner = findOwner(LP, newOwnerID);
-    adrPet newPet = findPet(LC, newPetID);
-
-    if (newOwner != nullptr && newPet != nullptr) {
-        // Cek apakah relasi baru sudah ada
-        if (findRelation(LR, newOwnerID, newPetID) == nullptr) {
-            R->ownerPtr = newOwner;
-            R->petPtr = newPet;
-            cout << "Relasi berhasil diubah." << endl;
-        } else {
-            cout << "Relasi tujuan sudah ada, edit dibatalkan." << endl;
-        }
-    } else {
-        cout << "Data Owner baru atau Pet baru tidak valid." << endl;
-    }
-}
-
-// ---------------- UPDATE DATA (U, V) ----------------
 void updateOwner(ListOwner &L, string id, string newNama) {
-    adrOwner P = findOwner(L, id);
-    if (P != nullptr) {
-        P->info.nama = newNama;
-        cout << "Data Owner berhasil diupdate." << endl;
-    } else {
-        cout << "Owner tidak ditemukan." << endl;
-    }
+    adrOwner O = findOwner(L, id);
+    if (O) O->info.nama = newNama;
 }
 
 void updatePet(ListPet &L, string id, string newNama, string newJenis) {
     adrPet P = findPet(L, id);
-    if (P != nullptr) {
+    if (P) {
         P->info.nama = newNama;
         P->info.jenis = newJenis;
-        cout << "Data Pet berhasil diupdate." << endl;
-    } else {
-        cout << "Pet tidak ditemukan." << endl;
     }
 }
 
-// ---------------- SORTING (W) ----------------
 void sortOwnersByNama(ListOwner &L) {
-    // Bubble Sort pada Double Linked List (Swap Info)
-    if (L.first == nullptr || L.first->next == nullptr) {
-            return; // 0 or 1 element
-    }
-
+    if (!L.first) return;
     bool swapped;
-    adrOwner P;
-    adrOwner LastPtr = nullptr;
-
     do {
         swapped = false;
-        P = L.first;
-
-        while (P->next != LastPtr) {
+        adrOwner P = L.first;
+        while (P->next) {
             if (P->info.nama > P->next->info.nama) {
-                // Swap Data
-                Owner temp = P->info;
-                P->info = P->next->info;
-                P->next->info = temp;
+                swap(P->info, P->next->info);
                 swapped = true;
             }
             P = P->next;
         }
-        LastPtr = P;
     } while (swapped);
-    cout << "List Owner berhasil diurutkan berdasarkan Nama (A-Z)." << endl;
 }
+
+void printPetsByOwner(ListRelation LR, string idOwner) {
+    adrRelation R = LR.first;
+    bool ada = false;
+
+    cout << "Hewan milik Owner ID " << idOwner << ":\n";
+    while (R != nullptr) {
+        if (R->ownerPtr->info.id == idOwner) {
+            cout << "- "
+                 << R->petPtr->info.nama
+                 << " (" << R->petPtr->info.jenis << ")\n";
+            ada = true;
+        }
+        R = R->next;
+    }
+
+    if (!ada) {
+        cout << "(Tidak ada hewan)\n";
+    }
+}
+
+void printOwnersByPet(ListRelation LR, string idPet) {
+    adrRelation R = LR.first;
+    bool ada = false;
+
+    cout << "Pemilik dari Hewan ID " << idPet << ":\n";
+    while (R != nullptr) {
+        if (R->petPtr->info.id == idPet) {
+            cout << "- " << R->ownerPtr->info.nama << endl;
+            ada = true;
+        }
+        R = R->next;
+    }
+
+    if (!ada) {
+        cout << "(Tidak ada pemilik)\n";
+    }
+}
+
+void editRelation(
+    ListRelation &LR,
+    ListOwner LO,
+    ListPet LP,
+    string oldOwnerID,
+    string oldPetID,
+    string newOwnerID,
+    string newPetID
+) {
+    adrRelation R = findRelation(LR, oldOwnerID, oldPetID);
+    if (R == nullptr) {
+        cout << "Relasi lama tidak ditemukan.\n";
+        return;
+    }
+
+    adrOwner newOwner = findOwner(LO, newOwnerID);
+    adrPet newPet = findPet(LP, newPetID);
+
+    if (newOwner == nullptr || newPet == nullptr) {
+        cout << "Owner atau Pet baru tidak valid.\n";
+        return;
+    }
+
+    if (findRelation(LR, newOwnerID, newPetID) != nullptr) {
+        cout << "Relasi baru sudah ada. Edit dibatalkan.\n";
+        return;
+    }
+
+    R->ownerPtr = newOwner;
+    R->petPtr = newPet;
+    cout << "Relasi berhasil diubah.\n";
+}
+
