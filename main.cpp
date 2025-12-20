@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cctype>
 #include "hewan.h"
+#include <limits>
 
 using namespace std;
 
@@ -15,7 +16,16 @@ void clearScreen() {
     system("clear");
 #endif
 }
-
+string senyumBesar = R"(
+      _.-'''''-._
+    .'  _     _  '.
+   /   (o)   (o)   \
+  |                 |
+  |  \           /  |
+   \  '.       .'  /
+    '.  `'---'`  .'
+      '-...___...-'
+    )";
 void pauseScreen() {
     cout << "\nTekan ENTER untuk lanjut...";
     cin.ignore();
@@ -42,6 +52,12 @@ string getValidOwnerID(ListOwner L) {
     while (true) {
         cout << "ID Owner (Angka) : ";
         cin >> id;
+        if (cin.eof()) exit(0);
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
         if (!isInteger(id)) {
             cout << "Error: ID harus berupa angka!\n";
         } else if (findOwner(L, id) != NULL) {
@@ -68,6 +84,12 @@ string getValidOwnerName(ListOwner L) {
     while (true) {
         cout << "Nama Owner : ";
         cin >> nama;
+        if (cin.eof()) exit(0);
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
         if (isOwnerNameExists(L, nama)) {
             cout << "Error: Nama Owner sudah ada!\n";
         } else {
@@ -81,6 +103,12 @@ string getValidPetID(ListPet L) {
     while (true) {
         cout << "ID Pet (Angka)   : ";
         cin >> id;
+        if (cin.eof()) exit(0);
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
         if (!isInteger(id)) {
             cout << "Error: ID harus berupa angka!\n";
         } else if (findPet(L, id) != NULL) {
@@ -94,29 +122,45 @@ string getValidPetID(ListPet L) {
 /* ================= MENU ================= */
 
 void showMenu() {
-    printLine();
-    cout << "   APLIKASI MANAJEMEN HEWAN & PEMILIK (MULTI LINKED LIST)\n";
-    printLine();
-    cout << "|  1 | Insert Owner (Parent)                           |\n";
-    cout << "|  2 | Insert Pet (Child)                              |\n";
-    cout << "|  3 | Connect Owner & Pet                             |\n";
-    cout << "|  4 | Show All Owners                                 |\n";
-    cout << "|  5 | Show All Pets                                   |\n";
-    cout << "|  6 | Show Owners beserta Hewannya                    |\n";
-    cout << "|  7 | Show Pets beserta Pemiliknya                    |\n";
-    cout << "|  8 | Cari Hewan milik Owner                          |\n";
-    cout << "|  9 | Cari Pemilik dari Hewan                         |\n";
-    cout << "| 10 | Delete Relation                                 |\n";
-    cout << "| 11 | Delete Owner (Cascade Delete)                   |\n";
-    cout << "| 12 | Delete Pet (Cascade Delete)                     |\n";
-    cout << "| 13 | Statistik                                       |\n";
-    cout << "| 14 | Edit Relation (Pindah Tangan)                   |\n";
-    cout << "| 15 | Edit Data Owner                                 |\n";
-    cout << "| 16 | Edit Data Pet                                   |\n";
-    cout << "| 17 | Sort Owner by Name (Ascending)                  |\n";
-    cout << "|  0 | Exit                                            |\n";
-    printLine();
-    cout << "Pilihan : ";
+    // Header dengan Kucing dan Nama
+    system("chcp 65001 > nul"); // Mengatur terminal ke mode UTF-8 agar kotak terbaca
+    cout << "  ╔═══════════════════════════════════════════════════════════╗" << endl;
+    cout << "  ║   /\\_/\\                                           /\\_/\\   ║" << endl;
+    cout << "  ║  ( o.o )    Muammad Cheng Ho & Zaidan Kamil      ( o.o )  ║" << endl;
+    cout << "  ║   > ^ <       ~ HEWAN & PEMILIK SYSTEM ~          > ^ <   ║" << endl;
+    cout << "  ╠═══════════════════════════════════════════════════════════╣" << endl;
+
+    // SECTION: INPUT
+    cout << "  ║ [ INPUT ]                                                 ║" << endl;
+    cout << "  ║  1. Insert Owner             2. Insert Pet                ║" << endl;
+    cout << "  ║  3. Connect Owner & Pet                                   ║" << endl;
+    cout << "  ║                                                           ║" << endl;
+
+    // SECTION: SHOW & SEARCH
+    cout << "  ║ [ SHOW & SEARCH ]                                         ║" << endl;
+    cout << "  ║  4. Show All Owners          5. Show All Pets             ║" << endl;
+    cout << "  ║  6. Show Owners + Hewan      7. Show Pets + Owner         ║" << endl;
+    cout << "  ║  8. Find Hewan by Owner      9. Find Owner by Hewan       ║" << endl;
+    cout << "  ║                                                           ║" << endl;
+
+    // SECTION: DELETE
+    cout << "  ║ [ DELETE ]                                                ║" << endl;
+    cout << "  ║ 10. Delete Relation Only                                  ║" << endl;
+    cout << "  ║ 11. Delete Owner (Cascade)  12. Delete Pet (Cascade)      ║" << endl;
+    cout << "  ║                                                           ║" << endl;
+
+    // SECTION: EDIT & TOOLS
+    cout << "  ║ [ EDIT & TOOLS ]                                          ║" << endl;
+    cout << "  ║ 13. Statistik               14. Edit Relation             ║" << endl;
+    cout << "  ║ 15. Edit Owner              16. Edit Pet                  ║" << endl;
+    cout << "  ║ 17. Sort Owner (Asc)                                      ║" << endl;
+
+    // FOOTER
+    cout << "  ║                                                           ║" << endl;
+    cout << "  ║  0. EXIT                                                  ║" << endl;
+    cout << "  ╚═══════════════════════════════════════════════════════════╝" << endl;
+    cout << endl;
+    cout << "  (>^_^)> Pilihan Menu: ";
 }
 
 /* ================= MAIN ================= */
@@ -158,6 +202,12 @@ int main() {
         clearScreen();
         showMenu();
         cin >> choiceStr;
+        if (cin.eof()) break;
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
         cin.ignore();
 
         if (isInteger(choiceStr)) {
@@ -290,12 +340,14 @@ int main() {
 
         case 17:
             sortOwnersByNama(LO);
-            cout << "Owner berhasil diurutkan (A-Z).\n";
+            cout << "Owner berhasil diurutkan (A-Z).\n\n";
+            printOwnersWithPetsTable(LO, LR);
             pauseScreen();
             break;
 
         case 0:
-            cout << "Keluar dari program...\n";
+            cout << "TERIMA KASIH SUDAH MENGGUNAKAN PROGRAM KAMI...\n";
+            cout << senyumBesar << endl;
             break;
 
         default:

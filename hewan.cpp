@@ -374,16 +374,43 @@ void updatePet(ListPet &L, string id, string newNama, string newJenis) {
 
 void sortOwnersByNama(ListOwner &L) {
     if (!L.first) return;
+
     bool swapped;
     do {
         swapped = false;
         adrOwner P = L.first;
+
         while (P->next) {
             if (P->info.nama > P->next->info.nama) {
-                swap(P->info, P->next->info);
+                // Swap Nodes P and P->next (let's call it Q)
+                adrOwner Q = P->next;
+
+                // Update external links (pointer ke node lain yg mengarah ke P atau Q)
+                if (P->prev) {
+                    P->prev->next = Q;
+                } else {
+                    L.first = Q;
+                }
+
+                if (Q->next) {
+                    Q->next->prev = P;
+                } else {
+                    L.last = P;
+                }
+
+                // Update internal links (pointer P dan Q itu sendiri)
+                P->next = Q->next;
+                Q->prev = P->prev;
+
+                Q->next = P;
+                P->prev = Q;
+
                 swapped = true;
+                // Setelah swap, P berpindah ke kanan (posisi next). 
+                // Kita lanjutkan loop dengan P yang sama untuk bubbling ke kanan.
+            } else {
+                P = P->next;
             }
-            P = P->next;
         }
     } while (swapped);
 }
