@@ -126,7 +126,7 @@ void showMenu() {
     system("chcp 65001 > nul"); // Mengatur terminal ke mode UTF-8 agar kotak terbaca
     cout << "  ╔═══════════════════════════════════════════════════════════╗" << endl;
     cout << "  ║   /\\_/\\                                           /\\_/\\   ║" << endl;
-    cout << "  ║  ( o.o )    Muammad Cheng Ho & Zaidan Kamil      ( o.o )  ║" << endl;
+    cout << "  ║  ( o.o )    Muhammad Cheng Ho & Zaidan Kamil     ( o.o )  ║" << endl;
     cout << "  ║   > ^ <       ~ HEWAN & PEMILIK SYSTEM ~          > ^ <   ║" << endl;
     cout << "  ╠═══════════════════════════════════════════════════════════╣" << endl;
 

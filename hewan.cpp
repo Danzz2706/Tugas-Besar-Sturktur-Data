@@ -236,79 +236,132 @@ void printPets(ListPet L) {
    ===================================================== */
 
 void printOwnersTable(ListOwner LO) {
-    cout << left << setw(10) << "ID" << setw(20) << "NAMA OWNER" << endl;
-    cout << string(30, '-') << endl;
+    if (LO.first == nullptr) {
+        cout << "Tidak ada data owner.\n";
+        return;
+    }
+    
+    cout << "╔════════════╦══════════════════════╗" << endl;
+    cout << "║ " << left << setw(10) << "ID" << " ║ " << setw(20) << "NAMA OWNER" << " ║" << endl;
+    cout << "╠════════════╬══════════════════════╣" << endl;
 
     adrOwner P = LO.first;
     while (P) {
-        cout << left << setw(10) << P->info.id
-             << setw(20) << P->info.nama << endl;
+        cout << "║ " << left << setw(10) << P->info.id
+             << " ║ " << setw(20) << P->info.nama << " ║" << endl;
         P = P->next;
     }
+    cout << "╚════════════╩══════════════════════╝" << endl;
 }
 
 void printPetsTable(ListPet LP) {
-    cout << left << setw(10) << "ID"
-         << setw(15) << "NAMA"
-         << setw(15) << "JENIS" << endl;
-    cout << string(40, '-') << endl;
+    if (LP.first == nullptr) {
+        cout << "Tidak ada data pet.\n";
+        return;
+    }
+
+    cout << "╔════════════╦═════════════════╦═════════════════╗" << endl;
+    cout << "║ " << left << setw(10) << "ID" 
+         << " ║ " << setw(15) << "NAMA" 
+         << " ║ " << setw(15) << "JENIS" << " ║" << endl;
+    cout << "╠════════════╬═════════════════╬═════════════════╣" << endl;
 
     adrPet P = LP.first;
     while (P) {
-        cout << left << setw(10) << P->info.id
-             << setw(15) << P->info.nama
-             << setw(15) << P->info.jenis << endl;
+        cout << "║ " << left << setw(10) << P->info.id
+             << " ║ " << setw(15) << P->info.nama
+             << " ║ " << setw(15) << P->info.jenis << " ║" << endl;
         P = P->next;
     }
+    cout << "╚════════════╩═════════════════╩═════════════════╝" << endl;
 }
 
 void printOwnersWithPetsTable(ListOwner LO, ListRelation LR) {
+    if (LO.first == nullptr) {
+        cout << "Tidak ada data owner.\n";
+        return;
+    }
+
     adrOwner O = LO.first;
     while (O) {
         cout << "\nOwner: " << O->info.nama << " (" << O->info.id << ")\n";
-        cout << left << setw(10) << "PET ID"
-             << setw(15) << "NAMA"
-             << setw(15) << "JENIS" << endl;
-        cout << string(40, '-') << endl;
-
+        
         bool ada = false;
+        // Cek dulu apakah ada relation
         adrRelation R = LR.first;
         while (R) {
             if (R->ownerPtr == O) {
-                adrPet P = R->petPtr;
-                cout << left << setw(10) << P->info.id
-                     << setw(15) << P->info.nama
-                     << setw(15) << P->info.jenis << endl;
                 ada = true;
+                break;
             }
             R = R->next;
         }
-        if (!ada) cout << "(Tidak punya hewan)\n";
+
+        if (ada) {
+            cout << "╔════════════╦═════════════════╦═════════════════╗" << endl;
+            cout << "║ " << left << setw(10) << "PET ID"
+                 << " ║ " << setw(15) << "NAMA"
+                 << " ║ " << setw(15) << "JENIS" << " ║" << endl;
+            cout << "╠════════════╬═════════════════╬═════════════════╣" << endl;
+
+            R = LR.first;
+            while (R) {
+                if (R->ownerPtr == O) {
+                    adrPet P = R->petPtr;
+                    cout << "║ " << left << setw(10) << P->info.id
+                         << " ║ " << setw(15) << P->info.nama
+                         << " ║ " << setw(15) << P->info.jenis << " ║" << endl;
+                }
+                R = R->next;
+            }
+            cout << "╚════════════╩═════════════════╩═════════════════╝" << endl;
+        } else {
+             cout << "(Tidak punya hewan)\n";
+        }
         O = O->next;
     }
 }
 
 void printPetsWithOwnersTable(ListPet LP, ListRelation LR) {
+    if (LP.first == nullptr) {
+        cout << "Tidak ada data pet.\n";
+        return;
+    }
+
     adrPet P = LP.first;
     while (P) {
         cout << "\nPet: " << P->info.nama
              << " (" << P->info.jenis << ")\n";
-        cout << left << setw(10) << "OWNER ID"
-             << setw(20) << "NAMA OWNER" << endl;
-        cout << string(30, '-') << endl;
-
+        
         bool ada = false;
         adrRelation R = LR.first;
         while (R) {
             if (R->petPtr == P) {
-                adrOwner O = R->ownerPtr;
-                cout << left << setw(10) << O->info.id
-                     << setw(20) << O->info.nama << endl;
                 ada = true;
+                break;
             }
             R = R->next;
         }
-        if (!ada) cout << "(Tidak punya pemilik)\n";
+
+        if (ada) {
+            cout << "╔════════════╦══════════════════════╗" << endl;
+            cout << "║ " << left << setw(10) << "OWNER ID"
+                 << " ║ " << setw(20) << "NAMA OWNER" << " ║" << endl;
+            cout << "╠════════════╬══════════════════════╣" << endl;
+
+            R = LR.first;
+            while (R) {
+                if (R->petPtr == P) {
+                    adrOwner O = R->ownerPtr;
+                    cout << "║ " << left << setw(10) << O->info.id
+                         << " ║ " << setw(20) << O->info.nama << " ║" << endl;
+                }
+                R = R->next;
+            }
+            cout << "╚════════════╩══════════════════════╝" << endl;
+        } else {
+            cout << "(Tidak punya pemilik)\n";
+        }
         P = P->next;
     }
 }
