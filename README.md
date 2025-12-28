@@ -3,7 +3,7 @@
 Program ini adalah aplikasi konsol C++ untuk mengelola data Pemilik (Owner) dan Hewan Peliharaan (Pet) serta relasi kepemilikan di antara keduanya.
 
 ## 👥 Dibuat Oleh
-- **Muammad Cheng Ho**
+- **Muhammad Cheng Ho**
 - **Zaidan Kamil**
 
 ## 📚 Deskripsi
